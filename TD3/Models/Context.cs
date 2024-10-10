@@ -1,0 +1,86 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
+namespace TD3.Models;
+
+public partial class CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext : DbContext
+{
+    public CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext()
+    {
+    }
+
+    public CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext(DbContextOptions<CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<Client> Clients { get; set; }
+
+    public virtual DbSet<Order> Orders { get; set; }
+
+    public virtual DbSet<OrderLine> OrderLines { get; set; }
+
+    public virtual DbSet<Product> Products { get; set; }
+
+    public virtual DbSet<Stock> Stocks { get; set; }
+
+    public virtual DbSet<Supplier> Suppliers { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;");
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasIndex(e => e.ClientId, "IX_Orders_ClientId");
+
+            entity.HasOne(d => d.Client).WithMany(p => p.Orders).HasForeignKey(d => d.ClientId);
+        });
+
+        modelBuilder.Entity<OrderLine>(entity =>
+        {
+            entity.HasIndex(e => e.OrderId, "IX_OrderLines_OrderId");
+
+            entity.HasIndex(e => e.ProductId, "IX_OrderLines_ProductId");
+
+            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderLines).HasForeignKey(d => d.OrderId);
+
+            entity.HasOne(d => d.Product).WithMany(p => p.OrderLines).HasForeignKey(d => d.ProductId);
+        });
+
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+
+            entity.HasMany(d => d.Suppliers).WithMany(p => p.Products)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ProductSupplier",
+                    r => r.HasOne<Supplier>().WithMany().HasForeignKey("SupplierId"),
+                    l => l.HasOne<Product>().WithMany().HasForeignKey("ProductId"),
+                    j =>
+                    {
+                        j.HasKey("ProductId", "SupplierId");
+                        j.ToTable("ProductSuppliers");
+                        j.HasIndex(new[] { "SupplierId" }, "IX_ProductSuppliers_SupplierId");
+                    });
+        });
+
+        modelBuilder.Entity<Stock>(entity =>
+        {
+            entity.HasKey(e => e.ProductId);
+
+            entity.Property(e => e.ProductId).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Product).WithOne(p => p.StockNavigation).HasForeignKey<Stock>(d => d.ProductId);
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}
