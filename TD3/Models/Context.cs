@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TD3.Models;
 
-public partial class CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext : DbContext
+public partial class Context : DbContext
 {
-    public CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext()
+    public Context()
     {
     }
 
-    public CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext(DbContextOptions<CUsersNathanDocumentsCoursCProjetTdTd1DataBddMdfContext> options)
+    public Context(DbContextOptions<Context> options)
         : base(options)
     {
     }
