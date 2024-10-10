@@ -13,21 +13,24 @@ public class ElectroShopContext : DbContext
     public DbSet<ProductSupplier> ProductSuppliers { get; set; }
     public DbSet<Stock> Stocks { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    if (!optionsBuilder.IsConfigured)
     {
         if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
         {
-            optionsBuilder.UseSqlServer(@"Server=localhost,1433;Database=TD1;User Id=SA;Password=P@ssw0rd;TrustServerCertificate=true;");
+            optionsBuilder.UseSqlServer(@"Server=localhost,1433;Database=ElectroShop;User Id=SA;Password=P@ssw0rd;TrustServerCertificate=true;");
         }
         else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
         {
-            optionsBuilder.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Nathan\Documents\cours\C#\projet_td\TD1\Data\bdd.mdf;Integrated Security=True");
+            optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;");
         }
         else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
         {
-            optionsBuilder.UseSqlServer(@"Server=localhost,1433;Database=TD1;User Id=SA;Password=P@ssw0rd;TrustServerCertificate=true;");
+            optionsBuilder.UseSqlServer(@"Server=localhost,1433;Database=ElectroShop;User Id=SA;Password=P@ssw0rd;TrustServerCertificate=true;");
         }
     }
+}
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
