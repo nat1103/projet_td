@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// ProductService.cs
+using Microsoft.EntityFrameworkCore;
 using TD3.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace TD3.Services
             _context = context;
         }
 
-        public void AddProduct(string name, decimal price, int stock)
+        public int AddProduct(string name, decimal price, int stock)
         {
             var product = new Product
             {
@@ -25,6 +26,7 @@ namespace TD3.Services
 
             _context.Add(product);
             _context.SaveChanges();
+            return product.ProductId; // Return the new product's ID
         }
 
         public void AddProducts(IEnumerable<Product> products)
@@ -33,15 +35,15 @@ namespace TD3.Services
             _context.SaveChanges();
         }
 
-        public void UpdateProduct(Product updatedProduct)
+        public void UpdateProduct(int productId, string name, decimal price, int stock)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProductId == updatedProduct.ProductId);
+            var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
             if (product != null)
             {
-                product.Name = updatedProduct.Name;
-                product.Price = updatedProduct.Price;
-                product.Stock = updatedProduct.Stock;
-        
+                product.Name = name;
+                product.Price = price;
+                product.Stock = stock;
+
                 // Mark the entity as modified
                 _context.Entry(product).State = EntityState.Modified;
                 _context.SaveChanges();
@@ -51,7 +53,7 @@ namespace TD3.Services
                 throw new ArgumentException("Product not found");
             }
         }
-        
+
         public void GetProducts()
         {
             var products = _context.Products.ToList();

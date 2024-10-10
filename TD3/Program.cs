@@ -5,6 +5,7 @@ using System.Runtime.InteropServices; // Add this using directive
 using TD3.Models;
 using TD3.Services;
 
+// Program.cs
 class Program
 {
     static void Main(string[] args)
@@ -24,29 +25,27 @@ class Program
         // Configuration des services et du DbContext
         var serviceProvider = new ServiceCollection()
             .AddDbContext<Context>(options =>
-                options.UseSqlServer(connectionString))  // Use the determined connection string
-            .AddTransient<ProductService>()  // Ajout du service pour les produits
-            .AddTransient<ClientService>()   // Ajout du service pour les clients
+                options.UseSqlServer(connectionString))
+            .AddTransient<ProductService>()
+            .AddTransient<ClientService>()
             .BuildServiceProvider();
 
-        // Obtention des services
         var produitService = serviceProvider.GetService<ProductService>();
         var clientService = serviceProvider.GetService<ClientService>();
 
-        // Ajouter des clients
         clientService.AddClient("Nathan", "3 rue de la paix", "test@test.fr");
         clientService.AddClient("Jean", "5 rue de la liberté", "jean@jean.fr");
-        
-        
-        // Usage example
-        produitService.AddProduct("Laptop", 1000, 10);
-        produitService.AddProduct("Desktop", 800, 5);
-        // Get all products to console
+
+        int laptopId = produitService.AddProduct("Laptop", 1000, 10);
+        int desktopId = produitService.AddProduct("Desktop", 800, 5);
+        Console.WriteLine($"Laptop ID: {laptopId}");
+        Console.WriteLine($"Desktop ID: {desktopId}");
+
         Console.WriteLine("All products:");
         produitService.GetProducts();
-        // Update product
-        produitService.UpdateProduct(new Product { ProductId = 1, Name = "Laptop 2", Price = 2000, Stock = 15 });
-        // Get all products to console
+
+        produitService.UpdateProduct(laptopId, "Laptop 2", 2000, 15);
+
         Console.WriteLine("\nAll products after update:");
         produitService.GetProducts();
     }
