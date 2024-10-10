@@ -12,8 +12,14 @@ public class AppDbContext : DbContext
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // Il doit aller sur la DB master et le schema doit être TDFLuent
-        optionsBuilder.UseSqlServer(@"Server=localhost,1433;Database=TD1;User Id=SA;Password=P@ssw0rd;TrustServerCertificate=true;");
+        if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+        {
+            optionsBuilder.UseSqlServer(@"Server=localhost,1433;Database=TD1;User Id=SA;Password=P@ssw0rd;TrustServerCertificate=true;");
+        }
+        else
+        {
+            optionsBuilder.UseSqlServer(@"Server=localhost,1433;Database=TD1;User Id=SA;Password=P@ssw0rd;TrustServerCertificate=true;");
+        }
     }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
