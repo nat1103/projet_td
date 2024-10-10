@@ -2,11 +2,14 @@ namespace TD1.Models;
 
 public class Product
 {
-    public int Id { get; set; }
+    public int ProductId { get; set; }
     public string Name { get; set; }
-    public double Price { get; set; }
+    public decimal Price { get; set; }
+    public int Stock { get; set; }
 
-    // Relation Many-to-Many
+    // Many-to-Many relationship with Supplier
     public ICollection<ProductSupplier> ProductSuppliers { get; set; }
 
+    // One-to-Many relationship with OrderLine
+    public ICollection<OrderLine> OrderLines { get; set; }
 }

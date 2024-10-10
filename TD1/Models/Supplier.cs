@@ -2,10 +2,10 @@ namespace TD1.Models;
 
 public class Supplier
 {
-    public int Id { get; set; }
+    public int SupplierId { get; set; }
     public string Name { get; set; }
+    public string Contact { get; set; }
 
-    // Many-to-Many relationship
+    // Many-to-Many relationship with Product
     public ICollection<ProductSupplier> ProductSuppliers { get; set; }
-
 }
