@@ -10,8 +10,8 @@ namespace TD3.Services
 {
     internal class ClientService
     {
-        private readonly Context _context;
-        public ClientService(Context context)
+        private readonly ElectroShopContext _context;
+        public ClientService(ElectroShopContext context)
         {
             _context = context;
         }

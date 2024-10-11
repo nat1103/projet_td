@@ -10,7 +10,7 @@ using TD3.Models;
 
 namespace TD3.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(ElectroShopContext))]
     partial class ContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

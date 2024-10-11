@@ -8,9 +8,9 @@ namespace TD3.Services
 {
     internal class ProductService
     {
-        private readonly Context _context;
+        private readonly ElectroShopContext _context;
 
-        public ProductService(Context context)
+        public ProductService(ElectroShopContext context)
         {
             _context = context;
         }

@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 
 namespace TD3.Models;
 
-public partial class Context : DbContext
+public partial class ElectroShopContext : DbContext
 {
-    public Context()
+    public ElectroShopContext()
     {
     }
 
-    public Context(DbContextOptions<Context> options)
+    public ElectroShopContext(DbContextOptions<ElectroShopContext> options)
         : base(options)
     {
     }
@@ -42,6 +42,8 @@ public partial class Context : DbContext
             {
                 optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ElectroShop;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;");
             }
+
+            optionsBuilder.UseLazyLoadingProxies(); // Add this line
         }
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)

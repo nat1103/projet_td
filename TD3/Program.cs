@@ -4,6 +4,7 @@ using System;
 using System.Runtime.InteropServices; // Add this using directive
 using TD3.Models;
 using TD3.Services;
+using TD3.Services.Seeder;
 
 // Program.cs
 class Program
@@ -24,29 +25,22 @@ class Program
 
         // Configuration des services et du DbContext
         var serviceProvider = new ServiceCollection()
-            .AddDbContext<Context>(options =>
+            .AddDbContext<ElectroShopContext>(options =>
                 options.UseSqlServer(connectionString))
             .AddTransient<ProductService>()
             .AddTransient<ClientService>()
+            .AddTransient<ISeederService , ProductSeeder>()
+            .AddTransient<ISeederService, ClientSeeder>()
+            .AddTransient<ISeederService, OrderSeeder>()
+            .AddTransient<DatabaseSeeder>()
             .BuildServiceProvider();
 
-        var produitService = serviceProvider.GetService<ProductService>();
-        var clientService = serviceProvider.GetService<ClientService>();
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+            seeder.Seed();
+        }
 
-        clientService.AddClient("Nathan", "3 rue de la paix", "test@test.fr");
-        clientService.AddClient("Jean", "5 rue de la liberté", "jean@jean.fr");
-
-        int laptopId = produitService.AddProduct("Laptop", 1000, 10);
-        int desktopId = produitService.AddProduct("Desktop", 800, 5);
-        Console.WriteLine($"Laptop ID: {laptopId}");
-        Console.WriteLine($"Desktop ID: {desktopId}");
-
-        Console.WriteLine("All products:");
-        produitService.GetProducts();
-
-        produitService.UpdateProduct(laptopId, "Laptop 2", 2000, 15);
-
-        Console.WriteLine("\nAll products after update:");
-        produitService.GetProducts();
+        Console.WriteLine("Données factices insérées.");
     }
 }
