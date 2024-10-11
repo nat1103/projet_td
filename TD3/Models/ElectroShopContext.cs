@@ -32,7 +32,8 @@ public partial class ElectroShopContext : DbContext
     private static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
     {
         builder
-            .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
+            .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information)
+            .AddConsole();
     });
 
     
