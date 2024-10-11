@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 
 namespace TD3.Models;
 
@@ -27,6 +28,12 @@ public partial class ElectroShopContext : DbContext
     public virtual DbSet<Stock> Stocks { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
+    
+    private static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+    {
+        builder
+            .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
+    });
 
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -36,11 +43,17 @@ public partial class ElectroShopContext : DbContext
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;");
+                optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;")
+                    .UseLoggerFactory(loggerFactory)  // Start the LoggerFactory
+                    .EnableSensitiveDataLogging()     // Enable sensitive data logging (optional)
+                    .EnableDetailedErrors();        // Enable detailed errors (optional)
             }
             else
             {
-                optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ElectroShop;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ElectroShop;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;")
+                    .UseLoggerFactory(loggerFactory)  // Start the LoggerFactory
+                    .EnableSensitiveDataLogging()     // Enable sensitive data logging (optional)
+                    .EnableDetailedErrors();        // Enable detailed errors (optional)
             }
         }
     }
