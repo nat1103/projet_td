@@ -153,9 +153,4 @@ public partial class ElectroShopContext : DbContext
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     
-    // Method to get all orders for a client using a stored procedure
-    public List<Order> GetOrdersByClient(int clientId)
-    {
-        return Orders.FromSqlRaw("EXEC GetCommandesByClient @ClientId = {0}", clientId).ToList();
-    }
 }
