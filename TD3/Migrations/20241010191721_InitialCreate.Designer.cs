@@ -11,7 +11,7 @@ using TD3.Models;
 
 namespace TD3.Migrations
 {
-    [DbContext(typeof(Context))]
+    [DbContext(typeof(ElectroShopContext))]
     [Migration("20241010191721_InitialCreate")]
     partial class InitialCreate
     {
