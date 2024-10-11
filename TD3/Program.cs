@@ -24,7 +24,7 @@ class Program
 
         // Configuration des services et du DbContext
         var serviceProvider = new ServiceCollection()
-            .AddDbContext<Context>(options =>
+            .AddDbContext<ElectroShopContext>(options =>
                 options.UseSqlServer(connectionString))
             .AddTransient<ProductService>()
             .AddTransient<ClientService>()

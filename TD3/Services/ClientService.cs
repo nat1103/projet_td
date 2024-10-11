@@ -10,10 +10,10 @@ namespace TD3.Services
 {
     internal class ClientService
     {
-        private readonly Context _context;
-        public ClientService(Context context)
+        private readonly ElectroShopContext _electroShopContext;
+        public ClientService(ElectroShopContext electroShopContext)
         {
-            _context = context;
+            _electroShopContext = electroShopContext;
         }
 
         public Client AddClient(String name, String address, String email)
@@ -25,18 +25,18 @@ namespace TD3.Services
                 Email = email
             };
 
-            _context.Add(client);
-            _context.SaveChanges();
+            _electroShopContext.Add(client);
+            _electroShopContext.SaveChanges();
             return client;
         }
         
         public void AddOrderForClient(int clientId, Order order)
         {
-            var client = _context.Clients.Include(c => c.Orders).FirstOrDefault(c => c.ClientId == clientId);
+            var client = _electroShopContext.Clients.Include(c => c.Orders).FirstOrDefault(c => c.ClientId == clientId);
             if (client != null)
             {
                 client.Orders.Add(order);
-                _context.SaveChanges();
+                _electroShopContext.SaveChanges();
             }
             else
             {
@@ -46,14 +46,14 @@ namespace TD3.Services
 
         public void AddClients(IEnumerable<Client> clients)
         {
-            _context.AddRange(clients);
-            _context.SaveChanges();
+            _electroShopContext.AddRange(clients);
+            _electroShopContext.SaveChanges();
         }
         
         // Get all clients
         public IEnumerable<Client> GetClients()
         {
-            return _context.Clients.Include(c => c.Orders).ToList();
+            return _electroShopContext.Clients.Include(c => c.Orders).ToList();
         }
 
     }
