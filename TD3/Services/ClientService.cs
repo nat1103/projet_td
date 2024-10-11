@@ -16,7 +16,7 @@ namespace TD3.Services
             _context = context;
         }
 
-        public void AddClient(String name, String address, String email)
+        public Client AddClient(String name, String address, String email)
         {
             var client = new Client
             {
@@ -27,12 +27,33 @@ namespace TD3.Services
 
             _context.Add(client);
             _context.SaveChanges();
+            return client;
+        }
+        
+        public void AddOrderForClient(int clientId, Order order)
+        {
+            var client = _context.Clients.Include(c => c.Orders).FirstOrDefault(c => c.ClientId == clientId);
+            if (client != null)
+            {
+                client.Orders.Add(order);
+                _context.SaveChanges();
+            }
+            else
+            {
+                throw new ArgumentException("Client not found");
+            }
         }
 
-        public void addClients(IEnumerable<Client> clients)
+        public void AddClients(IEnumerable<Client> clients)
         {
             _context.AddRange(clients);
             _context.SaveChanges();
+        }
+        
+        // Get all clients
+        public IEnumerable<Client> GetClients()
+        {
+            return _context.Clients.Include(c => c.Orders).ToList();
         }
 
     }

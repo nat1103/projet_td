@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace TD3.Services
 {
+    
     internal class ProductService
     {
         private readonly Context _context;
@@ -15,7 +16,7 @@ namespace TD3.Services
             _context = context;
         }
 
-        public int AddProduct(string name, decimal price, int stock)
+        public Product AddProduct(string name, decimal price, int stock)
         {
             var product = new Product
             {
@@ -26,7 +27,7 @@ namespace TD3.Services
 
             _context.Add(product);
             _context.SaveChanges();
-            return product.ProductId; // Return the new product's ID
+            return product; // Return the new product's ID
         }
 
         public void AddProducts(IEnumerable<Product> products)
