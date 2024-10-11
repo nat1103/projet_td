@@ -25,7 +25,6 @@ namespace TD3.Services.Seeder
 
         public void SeedData()
         {
-            Console.WriteLine("ProductSeeder");
             if (!_context.Products.Any())
             {
                 var produits = _productFaker.Generate(50);

@@ -35,7 +35,6 @@ namespace TD3.Services.Seeder
 
         public void SeedData()
         {
-            Console.WriteLine("OrderSeed");
             if (!_context.Orders.Any())
             {
                 var commandes = new List<Order>();

@@ -25,7 +25,6 @@ namespace TD3.Services.Seeder
 
         public void SeedData()
         {
-            Console.WriteLine("ClientSeeder");
             if (!_context.Clients.Any())
             {
                 var clients = _clientFaker.Generate(20);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices; // Add this using directive
 using TD3.Models;
 using TD3.Services;
@@ -9,6 +10,7 @@ using TD3.Services.Seeder;
 // Program.cs
 class Program
 {
+
     static void Main(string[] args)
     {
         // Determine the database connection string based on the OS
@@ -24,17 +26,16 @@ class Program
         }
 
         // Configuration des services et du DbContext
-        var serviceProvider = new ServiceCollection()
-            .AddDbContext<ElectroShopContext>(options =>
-                options.UseSqlServer(connectionString))
-            .AddTransient<ProductService>()
-            .AddTransient<ClientService>()
-            .AddTransient<ISeederService , ProductSeeder>()
-            .AddTransient<ISeederService, ClientSeeder>()
-            .AddTransient<ISeederService, OrderSeeder>()
-            .AddTransient<DatabaseSeeder>()
-            .BuildServiceProvider();
+        var serviceProvider = CreateService(connectionString);
 
+        LazyLoadingVsEagerLoading(serviceProvider);
+
+
+    }
+
+    // Seed the database with fake data
+    private static void FakeData(ServiceProvider serviceProvider)
+    {
         using (var scope = serviceProvider.CreateScope())
         {
             var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
@@ -42,5 +43,58 @@ class Program
         }
 
         Console.WriteLine("Données factices insérées.");
+    }
+
+    private static ServiceProvider CreateService(String connectionString)
+    {
+        return new ServiceCollection()
+            .AddDbContext<ElectroShopContext>(options =>
+                options.UseSqlServer(connectionString))
+            .AddTransient<ProductService>()
+            .AddTransient<ClientService>()
+            .AddTransient<ISeederService, ProductSeeder>()
+            .AddTransient<ISeederService, ClientSeeder>()
+            .AddTransient<ISeederService, OrderSeeder>()
+            .AddTransient<DatabaseSeeder>()
+            .BuildServiceProvider();
+    }
+
+    private static void LazyLoadingVsEagerLoading(ServiceProvider serviceProvider)
+    {
+        var stopwatch = new Stopwatch();
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ElectroShopContext>();
+
+            // Lazy Loading
+            stopwatch.Start();
+            var order = context.Orders.FirstOrDefault(c => c.OrderId == 1);
+
+            if (order != null)
+            {
+                foreach (var ligne in order.OrderLines)
+                {
+                    Console.WriteLine($"Produit: {ligne.ProductId}, Quantité: {ligne.Quantity}");
+                }
+            }
+            stopwatch.Stop();
+            Console.WriteLine($"Lazy Loading Time: {stopwatch.ElapsedMilliseconds} ms");
+            Console.WriteLine("-----------------------------------------------------");
+            // Eager Loading
+            stopwatch.Reset();
+            stopwatch.Start();
+            var commandes = context.Orders.Include(c => c.OrderLines).ToList();
+
+            foreach (var cmd in commandes)
+            {
+                foreach (var ligne in cmd.OrderLines)
+                {
+                    Console.WriteLine($"Produit: {ligne.ProductId}, Quantité: {ligne.Quantity}");
+                }
+            }
+            stopwatch.Stop();
+            Console.WriteLine($"Eager Loading Time: {stopwatch.ElapsedMilliseconds} ms");
+        }
     }
 }
