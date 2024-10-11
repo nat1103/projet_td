@@ -10,10 +10,10 @@ namespace TD3.Services
 {
     internal class ClientService
     {
-        private readonly ElectroShopContext _context;
-        public ClientService(ElectroShopContext context)
+        private readonly ElectroShopContext _electroShopContext;
+        public ClientService(ElectroShopContext electroShopContext)
         {
-            _context = context;
+            _electroShopContext = electroShopContext;
         }
 
         public void AddClient(String name, String address, String email)
@@ -25,14 +25,14 @@ namespace TD3.Services
                 Email = email
             };
 
-            _context.Add(client);
-            _context.SaveChanges();
+            _electroShopContext.Add(client);
+            _electroShopContext.SaveChanges();
         }
 
         public void addClients(IEnumerable<Client> clients)
         {
-            _context.AddRange(clients);
-            _context.SaveChanges();
+            _electroShopContext.AddRange(clients);
+            _electroShopContext.SaveChanges();
         }
 
     }
