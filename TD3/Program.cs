@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices; // Add this using directive
@@ -49,7 +50,12 @@ class Program
     {
         return new ServiceCollection()
             .AddDbContext<ElectroShopContext>(options =>
-                options.UseSqlServer(connectionString))
+                options.UseSqlServer(connectionString)
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors()
+                .LogTo(Console.WriteLine, LogLevel.Information)
+                .UseLazyLoadingProxies()
+               )
             .AddTransient<ProductService>()
             .AddTransient<ClientService>()
             .AddTransient<ISeederService, ProductSeeder>()
@@ -57,44 +63,49 @@ class Program
             .AddTransient<ISeederService, OrderSeeder>()
             .AddTransient<DatabaseSeeder>()
             .BuildServiceProvider();
+            
     }
 
     private static void LazyLoadingVsEagerLoading(ServiceProvider serviceProvider)
     {
         var stopwatch = new Stopwatch();
-
         using (var scope = serviceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ElectroShopContext>();
 
             // Lazy Loading
             stopwatch.Start();
-            var order = context.Orders.FirstOrDefault(c => c.OrderId == 1);
-
+            var order = context.Orders.ToList();
+            var numberLazy = 0;
+            var number = 0;
             if (order != null)
             {
-                foreach (var ligne in order.OrderLines)
+                foreach (var cmd in order)
                 {
-                    Console.WriteLine($"Produit: {ligne.ProductId}, Quantité: {ligne.Quantity}");
+                    foreach (var ligne in cmd.OrderLines)
+                    {
+                        Console.WriteLine($"Produit: {ligne.ProductId}, Quantité: {ligne.Quantity} Lazy");
+                        numberLazy++;
+                    }
                 }
             }
             stopwatch.Stop();
-            Console.WriteLine($"Lazy Loading Time: {stopwatch.ElapsedMilliseconds} ms");
+            Console.WriteLine($"Lazy Loading Time: {stopwatch.ElapsedMilliseconds} ms , nombre de requêtes : {numberLazy}");
             Console.WriteLine("-----------------------------------------------------");
             // Eager Loading
             stopwatch.Reset();
             stopwatch.Start();
             var commandes = context.Orders.Include(c => c.OrderLines).ToList();
-
             foreach (var cmd in commandes)
             {
                 foreach (var ligne in cmd.OrderLines)
                 {
-                    Console.WriteLine($"Produit: {ligne.ProductId}, Quantité: {ligne.Quantity}");
+                    Console.WriteLine($"Produit: {ligne.ProductId}, Quantité: {ligne.Quantity} Eager");
+                    number++;
                 }
             }
             stopwatch.Stop();
-            Console.WriteLine($"Eager Loading Time: {stopwatch.ElapsedMilliseconds} ms");
+            Console.WriteLine($"Eager Loading Time: {stopwatch.ElapsedMilliseconds} ms, Nombre de requêtes : {number}");
         }
     }
 }

@@ -28,15 +28,7 @@ public partial class ElectroShopContext : DbContext
     public virtual DbSet<Stock> Stocks { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
-    
-    private static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
-    {
-        builder
-            .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information)
-            .AddConsole();
-    });
 
-    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     // Add way to determine the connection string based on the OS
     {
@@ -45,16 +37,16 @@ public partial class ElectroShopContext : DbContext
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;")
-                    .UseLoggerFactory(loggerFactory)  // Start the LoggerFactory
                     .EnableSensitiveDataLogging()     // Enable sensitive data logging (optional)
-                    .EnableDetailedErrors();        // Enable detailed errors (optional)
+                    .EnableDetailedErrors()        // Enable detailed errors (optional)
+                    .LogTo(Console.WriteLine, LogLevel.Information);
             }
             else
             {
                 optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ElectroShop;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;")
-                    .UseLoggerFactory(loggerFactory)  // Start the LoggerFactory
                     .EnableSensitiveDataLogging()     // Enable sensitive data logging (optional)
-                    .EnableDetailedErrors();        // Enable detailed errors (optional)
+                    .EnableDetailedErrors()        // Enable detailed errors (optional)
+                    .LogTo(Console.WriteLine, LogLevel.Information);
             }
 
             optionsBuilder.UseLazyLoadingProxies(); // Add this line
