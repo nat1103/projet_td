@@ -8,11 +8,11 @@ namespace TD3.Services
 {
     internal class ProductService
     {
-        private readonly Context _context;
+        private readonly ElectroShopContext _electroShopContext;
 
-        public ProductService(Context context)
+        public ProductService(ElectroShopContext electroShopContext)
         {
-            _context = context;
+            _electroShopContext = electroShopContext;
         }
 
         public int AddProduct(string name, decimal price, int stock)
@@ -24,20 +24,20 @@ namespace TD3.Services
                 Stock = stock,
             };
 
-            _context.Add(product);
-            _context.SaveChanges();
+            _electroShopContext.Add(product);
+            _electroShopContext.SaveChanges();
             return product.ProductId; // Return the new product's ID
         }
 
         public void AddProducts(IEnumerable<Product> products)
         {
-            _context.AddRange(products);
-            _context.SaveChanges();
+            _electroShopContext.AddRange(products);
+            _electroShopContext.SaveChanges();
         }
 
         public void UpdateProduct(int productId, string name, decimal price, int stock)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
+            var product = _electroShopContext.Products.FirstOrDefault(p => p.ProductId == productId);
             if (product != null)
             {
                 product.Name = name;
@@ -45,8 +45,8 @@ namespace TD3.Services
                 product.Stock = stock;
 
                 // Mark the entity as modified
-                _context.Entry(product).State = EntityState.Modified;
-                _context.SaveChanges();
+                _electroShopContext.Entry(product).State = EntityState.Modified;
+                _electroShopContext.SaveChanges();
             }
             else
             {
@@ -56,7 +56,7 @@ namespace TD3.Services
 
         public void GetProducts()
         {
-            var products = _context.Products.ToList();
+            var products = _electroShopContext.Products.ToList();
             foreach (var product in products)
             {
                 Console.WriteLine($"Product ID: {product.ProductId}, Name: {product.Name}, Price: {product.Price}, Stock: {product.Stock}");

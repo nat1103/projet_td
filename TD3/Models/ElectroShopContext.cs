@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 
 namespace TD3.Models;
 
-public partial class Context : DbContext
+public partial class ElectroShopContext : DbContext
 {
-    public Context()
+    public ElectroShopContext()
     {
     }
 
-    public Context(DbContextOptions<Context> options)
+    public ElectroShopContext(DbContextOptions<ElectroShopContext> options)
         : base(options)
     {
     }
