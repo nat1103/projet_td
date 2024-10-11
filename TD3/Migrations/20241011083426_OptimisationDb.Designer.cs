@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TD3.Models;
 
@@ -11,9 +12,11 @@ using TD3.Models;
 namespace TD3.Migrations
 {
     [DbContext(typeof(ElectroShopContext))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20241011083426_OptimisationDb")]
+    partial class OptimisationDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

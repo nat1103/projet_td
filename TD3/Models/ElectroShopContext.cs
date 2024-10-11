@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 
 namespace TD3.Models;
 
@@ -27,6 +28,13 @@ public partial class ElectroShopContext : DbContext
     public virtual DbSet<Stock> Stocks { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
+    
+    private static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+    {
+        builder
+            .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information)
+            .AddConsole();
+    });
 
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -36,11 +44,17 @@ public partial class ElectroShopContext : DbContext
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;");
+                optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;")
+                    .UseLoggerFactory(loggerFactory)  // Start the LoggerFactory
+                    .EnableSensitiveDataLogging()     // Enable sensitive data logging (optional)
+                    .EnableDetailedErrors();        // Enable detailed errors (optional)
             }
             else
             {
-                optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ElectroShop;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=localhost,1433;Database=ElectroShop;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;")
+                    .UseLoggerFactory(loggerFactory)  // Start the LoggerFactory
+                    .EnableSensitiveDataLogging()     // Enable sensitive data logging (optional)
+                    .EnableDetailedErrors();        // Enable detailed errors (optional)
             }
         }
     }
@@ -49,6 +63,10 @@ public partial class ElectroShopContext : DbContext
         modelBuilder.Entity<Order>(entity =>
         {
             entity.HasIndex(e => e.ClientId, "IX_Orders_ClientId");
+
+            entity.Property(e => e.Status) // Max length and required for "Status"
+                  .HasMaxLength(20)
+                  .IsRequired();
 
             entity.HasOne(d => d.Client).WithMany(p => p.Orders).HasForeignKey(d => d.ClientId);
         });
@@ -59,16 +77,39 @@ public partial class ElectroShopContext : DbContext
 
             entity.HasIndex(e => e.ProductId, "IX_OrderLines_ProductId");
 
-            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.UnitPrice)
+                .HasColumnType("decimal(18, 2)")
+                .IsRequired();
+            
+            // Add check constraint for "UnitPrice"
+            entity.HasCheckConstraint("CK_OrderLine_UnitPrice", "UnitPrice >= 0.01");
 
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderLines).HasForeignKey(d => d.OrderId);
+            entity.Property(e => e.Quantity)
+                  .IsRequired()
+                  .HasDefaultValue(1); // Default value for "Quantity" is 1
+            
+            // Add check constraint for "Quantity"
+            entity.HasCheckConstraint("CK_OrderLine_Quantity", "Quantity >= 1");
 
-            entity.HasOne(d => d.Product).WithMany(p => p.OrderLines).HasForeignKey(d => d.ProductId);
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderLines).HasForeignKey(d => d.OrderId)
+                  .OnDelete(DeleteBehavior.Cascade); // cascade delete for "Order"
+
+            entity.HasOne(d => d.Product).WithMany(p => p.OrderLines).HasForeignKey(d => d.ProductId)
+                  .OnDelete(DeleteBehavior.Restrict); // restrict delete for "Product"
         });
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Price)
+                  .HasColumnType("decimal(18, 2)")
+                  .IsRequired();
+            
+            // Add check constraint for "Price"
+            entity.HasCheckConstraint("CK_Product_Price", "Price >= 0");
+
+            entity.Property(e => e.Name) // Ajout de la longueur maximale pour "Name"
+                  .HasMaxLength(100)
+                  .IsRequired(); // Rend le champ "Name" obligatoire
 
             entity.HasMany(d => d.Suppliers).WithMany(p => p.Products)
                 .UsingEntity<Dictionary<string, object>>(
@@ -89,7 +130,22 @@ public partial class ElectroShopContext : DbContext
 
             entity.Property(e => e.ProductId).ValueGeneratedNever();
 
-            entity.HasOne(d => d.Product).WithOne(p => p.StockNavigation).HasForeignKey<Stock>(d => d.ProductId);
+            entity.Property(e => e.QuantityInStock)
+                  .IsRequired();
+
+            entity.HasOne(d => d.Product).WithOne(p => p.StockNavigation).HasForeignKey<Stock>(d => d.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade); // cascade delete for "Product"
+        });
+
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.Property(e => e.Name) 
+                  .HasMaxLength(100)
+                  .IsRequired();
+
+            entity.Property(e => e.Contact)
+                  .HasMaxLength(100)
+                  .IsRequired();
         });
 
         OnModelCreatingPartial(modelBuilder);
