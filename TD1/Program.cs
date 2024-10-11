@@ -6,8 +6,6 @@ using TD1.Models;
 using (var ctx = new ElectroShopContext()) // using permet de fermer la connexion à la db
 {
     
-    ProductSupplier ps = new ProductSupplier(); 
-    
     Product prod = new Product();
     prod.Name = "Laptop";
     prod.Price = 1000;
@@ -17,6 +15,7 @@ using (var ctx = new ElectroShopContext()) // using permet de fermer la connexio
     sup.Name = "Dell";
     sup.Contact = "noreply@dell.fr";
     ctx.Suppliers.Add(sup);
+    ProductSupplier ps = new ProductSupplier(); 
     ps.Product = prod;
     ps.Supplier = sup;
     ctx.ProductSuppliers.Add(ps);
@@ -25,19 +24,20 @@ using (var ctx = new ElectroShopContext()) // using permet de fermer la connexio
     prod2.Price = 800;
     prod2.Stock = 5;
     ctx.Products.Add(prod2);
-    ps.Product = prod2;
-    ps.Supplier = sup;
-    ctx.ProductSuppliers.Add(ps);
+    ProductSupplier ps2 = new ProductSupplier(); 
+    ps2.Product = prod2;
+    ps2.Supplier = sup;
+    ctx.ProductSuppliers.Add(ps2);
     ctx.SaveChanges();
 
     foreach (var product in ctx.Products)
     {
-        Console.WriteLine(product.Name);
-        if(product.ProductSuppliers != null)
+        Console.WriteLine(product);
+        if (product.ProductSuppliers != null)
         {
             foreach (var productSuppliers in product.ProductSuppliers)
             {
-                Console.WriteLine($"\t{productSuppliers.Supplier.Name}");
+                Console.WriteLine(productSuppliers.Supplier);
             }
         }
     }

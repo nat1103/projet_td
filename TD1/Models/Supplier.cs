@@ -8,4 +8,9 @@ public class Supplier
 
     // Many-to-Many relationship with Product
     public ICollection<ProductSupplier> ProductSuppliers { get; set; }
+    
+    public override string ToString()
+    {
+        return $"Supplier: {Name}, Contact: {Contact}";
+    }
 }

@@ -12,4 +12,9 @@ public class Product
 
     // One-to-Many relationship with OrderLine
     public ICollection<OrderLine> OrderLines { get; set; }
+
+    public override string ToString()
+    {
+        return $"Product: {Name}, Price: {Price}, Stock: {Stock}";
+    }
 }
