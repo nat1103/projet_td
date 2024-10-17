@@ -55,13 +55,9 @@ namespace TD3.Services
             }
         }
 
-        public void GetProducts()
+        public List<Product> GetProducts()
         {
-            var products = _electroShopContext.Products.ToList();
-            foreach (var product in products)
-            {
-                Console.WriteLine($"Product ID: {product.ProductId}, Name: {product.Name}, Price: {product.Price}, Stock: {product.Stock}");
-            }
+            return _electroShopContext.Products.ToList();
         }
     }
 }
