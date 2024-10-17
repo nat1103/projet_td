@@ -35,6 +35,8 @@ class Program
         var clientService = serviceProvider.GetService<ClientService>();
         var transactionService = serviceProvider.GetService<TransactionService>();
         
+        // Create clients only if they don't exist
+
         Client nathanClient = clientService.AddClient("Nathan", "3 rue de la paix", "test@test.fr");
         Client jeanClient = clientService.AddClient("Jean", "5 rue de la liberté", "jean@jean.fr");
 
@@ -42,20 +44,30 @@ class Program
         Product desktop = produitService.AddProduct("Desktop", 800, 5);
         
         Console.WriteLine("Simulating a transaction...");
-
-        var order1 = new Order
+        try
         {
-            Date = DateTime.Now,
-            ClientId = nathanClient.ClientId,
-            Status = "Pending",
-            OrderLines = new List<OrderLine>
+            
+            var order1 = new Order
             {
-                new OrderLine { ProductId = laptop.ProductId, Quantity = 1 },
-                new OrderLine { ProductId = desktop.ProductId, Quantity = 1 }
-            }
-        };
-        
-        transactionService.ProcessOrder(order1);
+                Date = DateTime.Now,
+                ClientId = nathanClient.ClientId,
+                Status = "Pending",
+                OrderLines = new List<OrderLine>
+                {
+                    new OrderLine { ProductId = laptop.ProductId, Quantity = 1 },
+                    new OrderLine { ProductId = desktop.ProductId, Quantity = 1 }
+                }
+            };
+
+            transactionService.ProcessOrder(order1);
+
+            
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Transaction failed: {ex.Message}");
+        }
+
         
         Console.WriteLine("All products:");
         produitService.GetProducts();
@@ -85,7 +97,9 @@ class Program
         catch (Exception ex)
         {
             Console.WriteLine($"Transaction failed: {ex.Message}");
+            
         }
+        
         
         // List all user and there orders
         Console.WriteLine("\nAll users and their orders:");
@@ -99,7 +113,10 @@ class Program
                 Console.WriteLine($"\tOrder: {order.Date} - {order.Status}");
                 foreach (var orderLine in order.OrderLines)
                 {
-                    Console.WriteLine($"\t\tOrder line: {orderLine.ProductId} - {orderLine.Quantity}");
+                    //Console.WriteLine($"\t\tOrder line: {orderLine.ProductId} - {orderLine.Quantity}");
+                    // Get product from product service
+                    var product = produitService.GetProduct(orderLine.ProductId);
+                    Console.WriteLine($"\t\tOrder line: {product.Name} - {orderLine.Quantity}");
                 }
             }
             if (orders.Count == 0)

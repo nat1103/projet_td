@@ -54,6 +54,12 @@ namespace TD3.Services
                 throw new ArgumentException("Product not found");
             }
         }
+        
+        public Product GetProduct(int productId)
+        {
+            var product = _electroShopContext.Products.FirstOrDefault(p => p.ProductId == productId);
+            return product;
+        }
 
         public void GetProducts()
         {

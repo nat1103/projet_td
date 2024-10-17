@@ -43,8 +43,8 @@ namespace TD3.Services
                 }
                 catch (Exception)
                 {
-                    order.Status = "Failed";
-                    _electroShopContext.SaveChanges();
+                    // If an exception occurs, rollback the transaction and display a message
+                    Console.WriteLine("Transaction failed. Rolling back...");
                     transaction.Rollback();
                     throw;
                 }
