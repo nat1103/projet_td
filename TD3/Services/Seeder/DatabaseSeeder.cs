@@ -18,8 +18,8 @@ namespace TD3.Services.Seeder
         public void Seed()
         {
             Console.WriteLine("Seeding database...");
-            
-            foreach (var seederService in _seederServices)
+            var orderedSeeders = _seederServices.OrderBy(s => s.Order);
+            foreach (var seederService in orderedSeeders)
             {
 
                 seederService.SeedData();

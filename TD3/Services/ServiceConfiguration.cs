@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TD3.Models;
 using TD3.Services.Seeder;
 using Microsoft.Extensions.Logging;
+using TD3.Services;
 
 namespace TD3.Services
 {
@@ -20,7 +21,7 @@ namespace TD3.Services
                     options.UseSqlServer(connectionString)
                            .EnableSensitiveDataLogging()
                            .EnableDetailedErrors()
-                           .LogTo(Console.WriteLine, LogLevel.Information)
+                           
                            .UseLazyLoadingProxies())
                 .AddTransient<ProductService>()
                 .AddTransient<ClientService>()

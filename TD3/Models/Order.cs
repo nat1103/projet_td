@@ -24,4 +24,10 @@ public partial class Order
     public virtual Client Client { get; set; } = null!;
 
     public virtual ICollection<OrderLine> OrderLines { get; set; } = new List<OrderLine>();
+
+    public override string ToString()
+    {
+        return $"Id : {OrderId} Date :  {Date} Status : {Status}";
+    }
+
 }

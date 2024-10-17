@@ -14,6 +14,7 @@ namespace TD3.Services.Seeder
         private readonly Faker<Order> _orderFaker;
         private readonly Faker<OrderLine> _orderLineFaker;
 
+        public int Order => 3;
         public OrderSeeder(ElectroShopContext context)
         {
             _context = context;
@@ -35,6 +36,7 @@ namespace TD3.Services.Seeder
 
         public void SeedData()
         {
+            Console.WriteLine("Seeding Orders");
             if (!_context.Orders.Any())
             {
                 var commandes = new List<Order>();

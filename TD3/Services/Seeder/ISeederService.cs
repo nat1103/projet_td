@@ -8,6 +8,7 @@ namespace TD3.Services.Seeder
 {
     internal interface ISeederService
     {
+        int Order { get; }
         void SeedData();
     }
 }

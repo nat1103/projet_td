@@ -6,12 +6,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TD3.Models;
 using TD3.Services;
 
 
-namespace TD3
+namespace TD3.TUI
 {
     internal class DisplayConsole
     {
@@ -24,7 +23,7 @@ namespace TD3
         {
             productService = new ProductService(electroShopContext);
             clientService = new ClientService(electroShopContext);
-            orderService = new OrderService(electroShopContext , productService);
+            orderService = new OrderService(electroShopContext, productService);
             context = electroShopContext;
         }
 
@@ -164,7 +163,7 @@ namespace TD3
             Console.WriteLine("Simulating a unsuccessful transaction...");
 
             // Simulate a failed transaction for missing stock
-            productService.UpdateProduct(1 , "Laptop 2", 2000, 0);
+            productService.UpdateProduct(1, "Laptop 2", 2000, 0);
 
             try
             {
@@ -188,7 +187,55 @@ namespace TD3
             }
         }
 
+        public void DisplayAllUserWithOrder()
+        {
+            Console.WriteLine("\nAll users and their orders:");
+            var users = clientService.GetClients();
+            foreach (var user in users)
+            {
+                Console.WriteLine($"User: {user.Name}");
+                var orders = user.Orders;
+                foreach (var order in orders)
+                {
+                    Console.WriteLine($"\tOrder: {order.Date} - {order.Status}");
+                    foreach (var orderLine in order.OrderLines)
+                    {
+                        //Console.WriteLine($"\t\tOrder line: {orderLine.ProductId} - {orderLine.Quantity}");
+                        // Get product from product service
+                        var product = productService.GetProductById(orderLine.ProductId);
+                        Console.WriteLine($"\t\tOrder line: {product.Name} - {orderLine.Quantity}");
+                    }
+                }
+                if (orders.Count == 0)
+                {
+                    Console.WriteLine("\tNo orders");
+                }
+            }
+        }
 
+        public void DisplayOrderByIdClient()
+        {
+            Console.WriteLine("Veuillez entrer l'ID du Client : ");
+            if (!int.TryParse(Console.ReadLine(), out int orderId) || orderId <= 0)
+            {
+                Console.WriteLine("Erreur : ID de la client.");
+                return;
+            }
+
+            var order = context.Orders.Include(o => o.OrderLines).FirstOrDefault(o => o.OrderId == orderId);
+            if (order == null)
+            {
+                Console.WriteLine("Erreur : Commande introuvable.");
+                return;
+            }
+
+            Console.WriteLine($"Order ID: {order.OrderId}, Date: {order.Date}, Status: {order.Status}");
+            foreach (var orderLine in order.OrderLines)
+            {
+                var product = productService.GetProductById(orderLine.ProductId);
+                Console.WriteLine($"\tProduct: {product.Name}, Quantity: {orderLine.Quantity}");
+            }
+        }
         public void LazyLoadingVsEagerLoading()
         {
             Console.WriteLine("Lazy Loading vs Eager Loading");
@@ -233,5 +280,96 @@ namespace TD3
             stopwatch.Stop();
             Console.WriteLine($"Eager Loading Time: {stopwatch.ElapsedMilliseconds} ms, Nombre de requêtes : {numberEager}");
         }
+
+        public void DisplayGetOrdersByClient()
+        {
+            Console.WriteLine("Veuillez entrer l'ID du client : ");
+            if (!int.TryParse(Console.ReadLine(), out int clientId) || clientId <= 0)
+            {
+                Console.WriteLine("Erreur : ID du client invalide.");
+                return;
+            }
+
+            foreach (var order in orderService.GetOrdersByClient(clientId))
+            {
+                Console.WriteLine($"Order ID: {order.OrderId}, Date: {order.Date}, Status: {order.Status}");
+            }
+        }
+
+        public int DisplayAddOrder()
+        {
+            var listOrder = new List<OrderLine>();
+            Console.WriteLine("Veuillez entrer l'ID du client : ");
+            if (!int.TryParse(Console.ReadLine(), out int clientId) || clientId <= 0)
+            {
+                Console.WriteLine("Erreur : ID du client invalide.");
+                return -1;
+            }
+
+            Order order = new Order
+            {
+                Date = DateTime.Now,
+                ClientId = clientId,
+                Status = "Pending"
+            };
+
+            while (true)
+            {
+                Console.WriteLine("Veuillez entrer l'ID du produit: ");
+                if (!int.TryParse(Console.ReadLine(), out int productId) || productId <= 0)
+                {
+                    Console.WriteLine("Erreur : ID du produit invalide.");
+                    return -1;
+                }
+
+                Console.WriteLine("Veuillez entrer la quantité : ");
+                if (!int.TryParse(Console.ReadLine(), out int quantity) || quantity <= 0)
+                {
+                    Console.WriteLine("Erreur : La quantité doit être un entier positif.");
+                    return -1;
+                }
+                try
+                {
+
+                    foreach (var item in orderService.GetOrdersByClient(clientId))
+                    {
+                        Console.WriteLine(item.ToString());
+                    }
+                    var product = productService.GetProductById(productId);
+
+                    if (product == null)
+                    {
+                        Console.WriteLine("Erreur : Produit introuvable.");
+                        return -1;
+                    }
+
+                    listOrder.Add(new OrderLine
+                    {
+                        ProductId = productId,
+                        Quantity = quantity,
+                        UnitPrice = product.Price
+                    });
+                    Console.WriteLine("Produit ajouté à la commande.");
+
+
+                    Console.WriteLine("Voulez-vous ajouter un autre produit ? (O/N)");
+                    if (Console.ReadLine().ToUpper() != "O")
+                    {
+                        orderService.CreateOrderWithLines(order, listOrder);
+                        foreach (var item in orderService.GetOrdersByClient(clientId))
+                        {
+                            Console.WriteLine(item.ToString());
+                        }
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erreur lors de l'ajout du produit : {ex.Message}");
+                }
+            }
+            return -1;
+        }
+
     }
 }

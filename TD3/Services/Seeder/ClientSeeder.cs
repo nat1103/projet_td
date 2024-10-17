@@ -12,7 +12,7 @@ namespace TD3.Services.Seeder
     {
         private readonly ElectroShopContext _context;
         private readonly Faker<Client> _clientFaker;
-
+        public int Order => 1;
         public ClientSeeder(ElectroShopContext context)
         {
             _context = context;
@@ -25,6 +25,7 @@ namespace TD3.Services.Seeder
 
         public void SeedData()
         {
+            Console.WriteLine("Seeding Clients");
             if (!_context.Clients.Any())
             {
                 var clients = _clientFaker.Generate(20);
