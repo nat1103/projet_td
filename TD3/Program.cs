@@ -10,6 +10,8 @@ class Program
 {
     static void Main(string[] args)
     {
+        Td10();
+        /*
         // Determine the database connection string based on the OS
         string connectionString;
 
@@ -29,6 +31,7 @@ class Program
             .AddTransient<ProductService>()
             .AddTransient<ClientService>()
             .AddTransient<TransactionService>()
+            .AddTransient<OrderService>()
             .BuildServiceProvider();
 
         var produitService = serviceProvider.GetService<ProductService>();
@@ -106,7 +109,74 @@ class Program
             {
                 Console.WriteLine("\tNo orders");
             }
-        }
+        }*/
        
+    }
+    
+    private static void Td10()
+    {
+        string connectionString;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Nathan\\Documents\\cours\\C#\\projet_td\\TD1\\Data\\bdd.mdf;Integrated Security=True;";
+        }
+        else
+        {
+            connectionString = "Server=localhost,1433;Database=ElectroShop;User Id=sa;Password=P@ssw0rd;TrustServerCertificate=True;";
+        }
+
+        // Configuration des services et du DbContext
+        var serviceProvider = new ServiceCollection()
+            .AddDbContext<ElectroShopContext>(options =>
+                options.UseSqlServer(connectionString))
+            .AddTransient<ProductService>()
+            .AddTransient<ClientService>()
+            .AddTransient<TransactionService>()
+            .AddTransient<OrderService>()
+            .BuildServiceProvider();
+        
+        var orderService = serviceProvider.GetService<OrderService>();
+        var produitService = serviceProvider.GetService<ProductService>();
+        var clientService = serviceProvider.GetService<ClientService>();
+        
+        // Add an order
+        try
+        {
+            Client nathanClient = clientService.AddClient("Nathan", "3 rue de la paix", "test@test.fr");
+            Client jeanClient = clientService.AddClient("Jean", "5 rue de la liberté", "jean@jean.fr");
+
+            Product laptop = produitService.AddProduct("Laptop", 1000, 10);
+            Product desktop = produitService.AddProduct("Desktop", 800, 5);
+
+            Console.WriteLine("Simulating a transaction...");
+
+            var order1 = new Order
+            {
+                Date = DateTime.Now,
+                ClientId = nathanClient.ClientId,
+                Client = nathanClient,
+                Status = "Pending",
+                OrderLines = new List<OrderLine>
+                {
+                    new OrderLine { ProductId = laptop.ProductId, Quantity = 1, UnitPrice = laptop.Price },
+                    new OrderLine { ProductId = desktop.ProductId, Quantity = 2, UnitPrice = desktop.Price * 2} 
+                }
+            };
+            orderService.CreateOrderWithLines(order1, order1.OrderLines.ToList());
+            
+            // Get all orders for a client
+            var orders = orderService.GetOrdersByClient(nathanClient.ClientId);
+        
+            Console.WriteLine("All orders for client " + nathanClient.Name + " avec l'id " + nathanClient.ClientId + ":");
+            foreach (var order in orders)
+            {
+                Console.WriteLine($"Order: {order.OrderId} - {order.Date} - {order.Status}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Transaction failed: {ex.Message}");
+        }
     }
 }
