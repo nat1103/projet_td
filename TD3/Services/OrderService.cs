@@ -5,12 +5,12 @@ using TD3.Models;
 
 namespace TD3.Services
 {
-    internal class OrderService
+    internal class TransactionService
     {
         private readonly ElectroShopContext _electroShopContext;
         private readonly ProductService _productService;
 
-        public OrderService(ElectroShopContext electroShopContext, ProductService productService)
+        public TransactionService(ElectroShopContext electroShopContext, ProductService productService)
         {
             _electroShopContext = electroShopContext;
             _productService = productService;
@@ -41,10 +41,11 @@ namespace TD3.Services
                     _electroShopContext.SaveChanges();
                     transaction.Commit();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
+                    order.Status = "Failed";
+                    _electroShopContext.SaveChanges();
                     transaction.Rollback();
-                    Console.WriteLine("Erreur :" + e.Message);
                     throw;
                 }
             }

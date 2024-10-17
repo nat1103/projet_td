@@ -146,4 +146,5 @@ public partial class ElectroShopContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    
 }
