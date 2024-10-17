@@ -53,6 +53,10 @@ class Program
 
                 displayConsole.LazyLoadingVsEagerLoading();
                 break;
+            case "7":
+                displayConsole.DisplayExtendedScaffolding();
+                break;
+            
             default:
                 Console.WriteLine("Choix invalide.");
                 Console.WriteLine("Veuillez recommencer.");

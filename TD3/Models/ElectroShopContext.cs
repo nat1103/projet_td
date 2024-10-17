@@ -28,6 +28,8 @@ public partial class ElectroShopContext : DbContext
     public virtual DbSet<Stock> Stocks { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
+    
+    public virtual DbSet<VCommandesAvecTotal> VCommandesAvecTotal { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     // Add way to determine the connection string based on the OS
@@ -53,7 +55,15 @@ public partial class ElectroShopContext : DbContext
         }
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
+    
     {
+        modelBuilder.Entity<VCommandesAvecTotal>(entity =>
+        {
+            entity.HasNoKey();  // Spécifie que cette entité n'a pas de clé
+            entity.ToView("V_CommandesAvecTotal");  // Mappage vers la vue SQL
+            entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");  // Spécifie le type de données pour "Total"
+        });
+        
         modelBuilder.Entity<Order>(entity =>
         {
             entity.HasIndex(e => e.ClientId, "IX_Orders_ClientId");
@@ -144,6 +154,8 @@ public partial class ElectroShopContext : DbContext
 
         OnModelCreatingPartial(modelBuilder);
     }
+    
+    
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

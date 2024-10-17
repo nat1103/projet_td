@@ -133,6 +133,7 @@ namespace TD3
             Console.WriteLine(" 4/ TD7 :  Lazy Loading et Eager Loading ");
             Console.WriteLine(" 5/ TD9 :  Procédures stockées : lecture de données");
             Console.WriteLine(" 6/ TD10 : Procédures stockées : écriture de données");
+            Console.WriteLine(" 7/ TD11 : Procédures stockées : procédures stockées pour étendre le scaffolding");
 
             Console.WriteLine("Veuillez entrer votre choix : ");
             return Console.ReadLine();
@@ -232,6 +233,13 @@ namespace TD3
 
             stopwatch.Stop();
             Console.WriteLine($"Eager Loading Time: {stopwatch.ElapsedMilliseconds} ms, Nombre de requêtes : {numberEager}");
+        }
+
+        public void DisplayExtendedScaffolding()
+        {
+            Console.WriteLine("Extended Scaffolding");
+            var commands = context.VCommandesAvecTotal.ToListAsync();
+            Console.WriteLine($"Nombre de commandes : {commands.Result.Count}");
         }
     }
 }
