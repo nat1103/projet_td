@@ -347,7 +347,7 @@ namespace TD3.TUI
                     {
                         ProductId = productId,
                         Quantity = quantity,
-                        UnitPrice = product.Price
+                        UnitPrice = product.Price * quantity
                     });
                     Console.WriteLine("Produit ajouté à la commande.");
 
