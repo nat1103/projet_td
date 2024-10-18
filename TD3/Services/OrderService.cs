@@ -71,21 +71,40 @@ namespace TD3.Services
             var dateParam = new Microsoft.Data.SqlClient.SqlParameter("@Date", date);
             var statusParam = new Microsoft.Data.SqlClient.SqlParameter("@Status", status);
 
-            // Exécute la procédure stockée avec le paramètre de sortie
+            // Exï¿½cute la procï¿½dure stockï¿½e avec le paramï¿½tre de sortie
             _electroShopContext.Database.ExecuteSqlRaw(
                 "EXEC AddOrder @ClientId, @Date, @Status, @OrderId OUTPUT",
                 clientIdParam, dateParam, statusParam, orderIdParam
             );
 
-            // Récupère la valeur de l'ID généré
+            // Rï¿½cupï¿½re la valeur de l'ID gï¿½nï¿½rï¿½
             return (int)orderIdParam.Value;
         }
 
         // Method to add an order line using a stored procedure
         public void AddOrderLine(int orderId, int productId, int quantity, decimal unitPrice)
         {
-            _electroShopContext.Database.ExecuteSqlRaw("EXEC AddOrderLine @OrderID = {0}, @ProductID = {1}, @Quantity = {2}, @UnitPrice = {3}",
-                orderId, productId, quantity, unitPrice);
+            using var transaction = _electroShopContext.Database.BeginTransaction();
+            try
+            {
+                var orderLine = new OrderLine
+                {
+                    OrderId = orderId,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    UnitPrice = unitPrice
+                };
+                
+                _electroShopContext.OrderLines.Add(orderLine);
+                _electroShopContext.SaveChanges();
+                
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new Exception("Error adding order line", ex);
+            }
         }
 
         // Method that creates an order and its order lines
@@ -99,15 +118,25 @@ namespace TD3.Services
             {
                 throw new Exception("Order lines must have a positive quantity and a positive unit price");
             }
+            if (orderLines.Any(line => line.ProductId <= 0))
+            {
+                throw new Exception("Order lines must have a valid product ID");
+            }
             try
             {
                 // Add the order
                 int newOrderId = this.AddOrder(order.ClientId, order.Date, order.Status);
-
-                // Add the order lines
-                foreach (var line in orderLines)
+                
+                foreach (var orderLine in orderLines)
                 {
-                    this.AddOrderLine(newOrderId, line.ProductId, line.Quantity, line.UnitPrice);
+                    var product = _electroShopContext.Products.FirstOrDefault(p => p.ProductId == orderLine.ProductId);
+                    if (product == null || product.Stock <= 0)
+                    {
+                        throw new InvalidOperationException($"Product with ID: {orderLine.ProductId} is not available in stock.");
+                    }
+        
+                    _productService.UpdateProduct(product.ProductId, product.Name, product.Price, product.Stock - orderLine.Quantity);
+                    this.AddOrderLine(newOrderId, orderLine.ProductId, orderLine.Quantity, orderLine.UnitPrice);
                 }
 
                 return newOrderId;
